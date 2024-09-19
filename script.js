@@ -1,5 +1,35 @@
-function currentDate() {
-  let date = new Date();
+function displayTemperature(response) {
+  let temperatureElement = document.querySelector("#current-temperature");
+  let temperature = Math.round(response.data.temperature.current);
+  let cityElement = document.querySelector("#current-city");
+  cityElement.innerHTML = response.data.city;
+  temperatureElement.innerHTML = temperature;
+}
+
+function search(event) {
+  event.preventDefault();
+  let searchInputElement = document.querySelector("#search-input");
+  let city = searchInputElement.value;
+
+  let apiKey = "b2a5adcct04b33178913oc335f405433";
+  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+
+  axios.get(apiUrl).then(displayTemperature);
+}
+
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
+  let day = date.getDay();
+
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+
+  if (hours < 10) {
+    hours = `0${hours}`;
+  }
+
   let days = [
     "Sunday",
     "Monday",
@@ -9,67 +39,15 @@ function currentDate() {
     "Friday",
     "Saturday",
   ];
-  let day = days[date.getDay()];
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
 
-  // Add leading zero to minutes if it's less than 10
-  if (minutes < 10) {
-    minutes = `0${minutes}`;
-  }
-
-  let temperature = document.querySelector("#temperature");
-  temperature.innerHTML = `${day} ${hours}:${minutes}`;
-}
-function handleSubmit(event) {
-  event.preventDefault();
-  let enterCity = document.querySelector("#search-form");
-  let h1 = document.querySelector("#current-city");
-  h1.innerHTML = `${enterCity.value}`;
+  let formattedDay = days[day];
+  return `${formattedDay} ${hours}:${minutes}`;
 }
 
-currentDate();
-let form = document.querySelector("#form-input");
-form.addEventListener("submit", handleSubmit);
+let searchForm = document.querySelector("#search-form");
+searchForm.addEventListener("submit", search);
 
-// Listen for the form submit event
-document
-  .getElementById("form-input")
-  .addEventListener("submit", function (event) {
-    // Prevent the form from reloading the page
-    event.preventDefault();
+let currentDateELement = document.querySelector("#current-date");
+let currentDate = new Date();
 
-    // Step 1: Store important elements in variables
-    let searchInput = document.getElementById("search-form"); // The input where the user types the city name
-    let cityElement = document.getElementById("current-city"); // The place where the city name will be displayed
-    let temperatureElement = document.querySelector(
-      ".current-temperature-value"
-    ); // The place where the temperature will be shown
-
-    // Step 2: Get the city name from the input field
-    let city = searchInput.value; // Get the value entered by the user
-
-    // Step 3: Define the API URL and key
-    let apiKey = "409358oa0b2d74cc98fa66aabc1789t2"; // The API key for accessing the weather data
-    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}`; // The URL to get the weather data
-
-    // Step 4: Make the API request to get the weather data
-    axios
-      .get(apiUrl)
-      .then(function (response) {
-        // Step 5: Get the weather information from the response
-        let cityName = response.data.city; // Get the city name from the API response
-        let todayTemperature = Math.round(
-          response.data.daily[0].temperature.day
-        ); // Get the current day's temperature and round it to a whole number
-
-        // Step 6: Update the HTML with the city name and temperature
-        cityElement.innerHTML = cityName; // Display the city name in the element
-        temperatureElement.innerHTML = todayTemperature; // Display the temperature in the element
-      })
-      .catch(function (error) {
-        // If there's an error (e.g., city not found), show an alert
-        console.error("Error fetching weather data:", error);
-        alert("Could not find weather information for that city.");
-      });
-  });
+currentDateELement.innerHTML = formatDate(currentDate);
